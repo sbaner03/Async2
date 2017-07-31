@@ -43,3 +43,4 @@ except:
 resdf = df.append(pd.DataFrame.from_dict(newstats, orient='index'))
 resdf.to_csv('results.csv')
 print (resdf)
+print (stats[1][0:10])
