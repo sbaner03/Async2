@@ -7,7 +7,8 @@ import json
 import asyncio
 
 
-client = AsyncIOMotorClient("mongodb://localhost:27017")
+client = AsyncIOMotorClient("mongodb://ankitgoel888:iep54321@cluster0-shard-00-00-ilsaa.mongodb.net:27017,cluster0-shard-00-01-ilsaa.mongodb.net:27017,cluster0-shard-00-02-ilsaa.mongodb.net:27017/<DATABASE>?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin")
+#"mongodb://localhost:27017"
 db = client.spotonv4
 handling = 3
 

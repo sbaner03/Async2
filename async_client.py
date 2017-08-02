@@ -24,7 +24,7 @@ async def main(websites):
 
 
 checklist = pickle.load( open("C:/Users/Ankit Goel/Dropbox/Python/testrest/Async2/Async2/checklist.pkl", "rb" ) )
-checklist = list(pd.unique(checklist))[0:20]
+checklist = list(pd.unique(checklist))[0:500]
 jsondata = [json.dumps({'con': '10000','origin': i[0], 'destination': i[1],'location': i[0],'arratloc': '2017-07-08 17:30:00'}) for i in checklist]
 websites = [['http://localhost:50000/',jsondata[ix]] for ix,i in enumerate(checklist)]
 loop = asyncio.get_event_loop()
