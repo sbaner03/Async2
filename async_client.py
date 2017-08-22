@@ -8,39 +8,34 @@ import json
 
 
 
+
 async def fetch(session, url,data):
     with async_timeout.timeout(0):
         async with session.get(url, data = data) as response:
-            return await response.text()
+            return await response.json()
 
-async def main(websites):
+async def main(requests):
     async with aiohttp.ClientSession() as session:
         start = datetime.now()
-        htmls = [await fetch(session, html[0],html[1]) for html in websites]
+        responses = [await fetch(session, req[0],req[1]) for req in requests]
         mid = datetime.now()
         end = datetime.now()
         total = (end-start).total_seconds()
-        return (total,htmls)
+        return total,responses
 
 
-checklist = pickle.load( open("C:/Users/Ankit Goel/Dropbox/Python/testrest/Async2/Async2/checklist.pkl", "rb" ) )
-checklist = list(pd.unique(checklist))[0:500]
-jsondata = [json.dumps({'con': '10000','origin': i[0], 'destination': i[1],'location': i[0],'arratloc': '2017-07-08 17:30:00'}) for i in checklist]
-websites = [['http://localhost:50000/',jsondata[ix]] for ix,i in enumerate(checklist)]
+df = pd.read_excel('http://spoton.co.in/downloads/HTR_1HR/HTR_1HR.xls')
+df['TIMESTAMP'] = df.apply(lambda x: datetime.strftime(x['TIMESTAMP'],"%Y-%m-%d %H:%M:%S"),axis=1)
+condict = zip(df['Con Number'],df['Origin Branch'],df['Destn Branch'],df['Hub SC Location'],df['TIMESTAMP'])
+
+jsondata = [json.dumps({'con': str(i[0]),'origin': i[1], 'destination': i[2],'location': i[3],'arratloc': i[4]}) for i in condict]
+requests = [['http://localhost:50000/',i] for i in jsondata]
 loop = asyncio.get_event_loop()
-stats = loop.run_until_complete(main(websites))
-print (stats[0],stats[1])
-# errorcount = len([i for i in stats[1] if 'Error' in i[0]])
-# newstats ={datetime.strftime(datetime.now(),'%Y-%m-%d %H:%s'):[stats[0],errorcount,len(checklist)]}
-# basestats = {'2017-07-29 0:0': [0, 0,0]}
-# try:
-#     df = pd.read_csv('results.csv')
-#     df.columns = ['Time',0,1,2]
-#     df = df.set_index('Time')
+timetaken,coneta = loop.run_until_complete(main(requests))
+retdf = pd.DataFrame(coneta)
+retdf['Con Number'] = retdf.apply(lambda x: int(x['Con Number']), axis=1)
+df = pd.merge(df,retdf, on = 'Con Number', how = 'left')
+print (timetaken)
+print (len(df))
 
-# except:
-#     df = pd.DataFrame.from_dict(basestats, orient='index')
-#     df.columns = [0,1,2]
-# resdf = df.append(pd.DataFrame.from_dict(newstats, orient='index'))
-# resdf.to_csv('results.csv')
-# print (resdf)
+

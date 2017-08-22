@@ -7,8 +7,9 @@ import json
 import asyncio
 
 
-client = AsyncIOMotorClient("mongodb://ankitgoel888:iep54321@cluster0-shard-00-00-ilsaa.mongodb.net:27017,cluster0-shard-00-01-ilsaa.mongodb.net:27017,cluster0-shard-00-02-ilsaa.mongodb.net:27017/<DATABASE>?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin")
+#client = AsyncIOMotorClient("mongodb://ankitgoel888:iep54321@cluster0-shard-00-00-ilsaa.mongodb.net:27017,cluster0-shard-00-01-ilsaa.mongodb.net:27017,cluster0-shard-00-02-ilsaa.mongodb.net:27017/<DATABASE>?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin")
 #"mongodb://localhost:27017"
+client = AsyncIOMotorClient('mongodb://localhost:27017')
 db = client.spotonv4
 handling = 3
 
@@ -41,7 +42,7 @@ class Con:
     def geteta(self,etatype="schedule"):
         [self.a["legdata"].get(str(i)).append({'depdetails':self.func(self.a["legdata"].get(str(i))[2],self.currtime,etatype)}) if i==1 else self.a["legdata"].get(str(i)).append({'depdetails':self.func(self.a["legdata"].get(str(i))[2],self.a['legdata'].get(str(i-1))[3]['depdetails'][2])}) for i in range(1,len(self.a['legdata'])+1)]
         eta = self.a["legdata"].get(str(len(self.a["legdata"])))[3]['depdetails'][2]
-        return eta
+        return {'Con Number': str(self.docno),'ETA': datetime.strftime(eta,"%Y-%m-%d %H:%M:%S")}
     # pre-if code: for first leg please use currtime
     # post-if code: for subsequent legs please use the available time already updated in penultimate leg since the list comprehension is based on a range
     def getjourney(self,etatype="schedule"):
@@ -56,8 +57,8 @@ async def handle(request):
     try:
         res = Con(data,condata).geteta()
     except:
-        res = 'Error'+str(data)
-    return web.Response(text=str(res))
+        res = {'Con Number': str(data['con']),'ETA': 'Error'}
+    return web.json_response(res)
 
 
 
